@@ -241,8 +241,8 @@ If you use BHRuler or the accompanying datasets in your work, please cite:
   title        = {A Scale-Invariant Ruler for Black Holes: From Stellar-Mass to Ultra-Massive with Unified Uncertainties (V1)},
   year         = {2025},
   eprint       = {XXXX.YYYYY},
-  archivePrefix= {arXiv},
-  primaryClass = {astro-ph.HE},
+  archivePrefix= n/a,
+  primaryClass = n/a
   note         = {BHRuler software and data}
 }
 ```
