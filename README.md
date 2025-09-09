@@ -231,7 +231,7 @@ Issues and pull requests are welcome. Please:
 
 If you use BHRuler or the accompanying datasets in your work, please cite:
 
-> **Nagy, S. L. (2025)**, *A Scale-Invariant Ruler for Black Holes: From Stellar-Mass to Ultra-Massive with Unified Uncertainties (V1)*, (arXiv\:XXXX.YYYYY).
+> Nagy, S. L. *BHRuler*
 
 **BibTeX**
 
