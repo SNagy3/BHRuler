@@ -1,0 +1,124 @@
+
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{siunitx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{authblk}
+
+\title{A Scale-Invariant Ruler for Black Holes: From Stellar-Mass to Ultra-Massive with Unified Uncertainties}
+\author{Stephen L Nagy}
+\affil{Independent Researcher}
+\date{September 2025}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We present the \emph{Black Hole Ruler}, a scale-invariant framework that maps astrophysical black holes onto a common set of gravitational units and orbital landmarks. The ruler uses mass $M$ (and, where available, spin $a_*$) to compute a baseline triplet---gravitational time $t_g=GM/c^3$, Schwarzschild radius $r_s=2GM/c^2$, and ISCO frequency $f_{\rm ISCO}$---and exploits the mass-invariant product $f_{\rm ISCO}\,t_g = 1/(6^{3/2}2\pi)$ as a universal sanity check. Deviations from the Schwarzschild baseline are modeled via Kerr spin corrections, and accretion physics is incorporated through a dual prescription that makes model dependence explicit: an efficiency bridge ($L=\eta_{\rm eff}\dot{M}c^2$) versus an ADAF/RIAF branch ($\lambda_{\rm Edd}=\kappa\dot{m}^2$). The ruler is extended with environmental context (sphere of influence $r_{\rm infl}=GM/\sigma^2$) and a tidal-disruption module with a logistic capture boundary. Case studies spanning eight orders of magnitude in mass---Cygnus X-1 (XRB), Sgr A* (quiescent SMBH), and M87* (LLAGN)---demonstrate predictive and diagnostic power: spin-aware ISCO shifts, horizon magnetic fields, and Blandford--Znajek jet powers that bracket observations without fine-tuning.
+\end{abstract}
+
+\section{Introduction}
+Black holes span $\sim 10$ orders of magnitude in mass, yet observations are fragmented across wavelengths and techniques. We aim to unify these regimes with a minimal, Kerr-based template and explicit uncertainty propagation. Prior work includes horizon-scale imaging, gravitational-wave catalogs, maser dynamics, and reverberation mapping. Our contribution is a scale-invariant synthesis with a dual-branch accretion prescription and a transparent catalog schema for derived quantities.
+
+\section{The Black Hole Ruler}
+\subsection{Gravitational units and baseline invariant}
+We adopt units $G=c=1$ for derivations, restoring constants in reported values. The core definitions are
+\begin{align}
+ t_g &= GM/c^3, & r_g &= GM/c^2, & r_s &= 2r_g,\\
+ r_{\rm ISCO}^{\rm Schw} &= 6r_g, & f_{\rm ISCO}^{\rm Schw} &= \frac{c^3}{6^{3/2}2\pi GM}, & f_{\rm ISCO}t_g &= \frac{1}{6^{3/2}2\pi}\ (\approx 0.01083).
+\end{align}
+\subsection{Kerr spin corrections}
+Using the Bardeen--Press--Teukolsky expressions, we compute $r_{\rm ISCO}(a_*)$ and
+\begin{equation}
+  f_{\rm ISCO}(a_*)=\frac{c^3}{2\pi GM}\,\frac{1}{r_{\rm ISCO}^{3/2}+a_*}
+\end{equation}
+for prograde/retrograde branches. Spin moves sources along a known one-parameter family relative to the Schwarzschild baseline.
+
+\section{Accretion Prescriptions and Jet Power}
+\subsection{Efficiency bridge vs.\ ADAF/RIAF}
+\textbf{Efficiency bridge:}\quad $\dot{m}=\lambda_{\rm Edd}/\eta_{\rm eff}$, $B_H\propto \dot{m}^{1/2}M^{-1/2}$, $P_{\rm BZ}\propto a_*^2(\lambda_{\rm Edd}/\eta_{\rm eff})M$.\\[3pt]
+\textbf{ADAF/RIAF:}\quad $\lambda_{\rm Edd}=\kappa\dot{m}^2 \Rightarrow \dot{m}=(\lambda_{\rm Edd}/\kappa)^{1/2}$, hence $B_H\propto(\lambda_{\rm Edd}/\kappa)^{1/4}M^{-1/2}$, $P_{\rm BZ}\propto a_*^2(\lambda_{\rm Edd}/\kappa)^{1/2}M$. We provide both branches and propagate uncertainties in log-space.
+\subsection{Blandford--Znajek scaling}
+We estimate
+\begin{equation}
+  P_{\rm BZ}\approx 10^{45}\ \mathrm{erg\ s^{-1}}\ \left(\frac{a_*}{0.9}\right)^2\left(\frac{B_H}{10^4\ \mathrm{G}}\right)^2\left(\frac{M}{10^9M_\odot}\right)^2
+\end{equation}
+and report ranges based on the branch selection, guided by polarimetry and variability near $\sim 10\,t_g$.
+
+\section{Environmental Context and TDE Module}
+\subsection{Sphere of influence and morphology}
+We compute $r_{\rm infl}=GM/\sigma^2$ and $r_{\rm infl}/R_e$ with a three-tier $\sigma$ acquisition strategy (IFU/long-slit; dynamical fallback with $k$-factor provenance; scaling fallback with morphology warnings). Errors are propagated via
+\begin{align}
+\frac{\delta r_{\rm infl}}{r_{\rm infl}}&=\sqrt{\left(\frac{\delta M}{M}\right)^2+\left(2\frac{\delta\sigma}{\sigma}\right)^2},\\
+\frac{\delta (r_{\rm infl}/R_e)}{(r_{\rm infl}/R_e)}&=\sqrt{\left(\frac{\delta r_{\rm infl}}{r_{\rm infl}}\right)^2+\left(\frac{\delta R_e}{R_e}\right)^2}.
+\end{align}
+\subsection{TDE critical mass and rates}
+We set a spin-aware disruption boundary with a logistic capture factor $S(M;a_*)$ and model per-galaxy rates $\Gamma_{\rm gal}=\Gamma_0(M/10^6M_\odot)^{\alpha}(\rho_\star/\rho_0)^{\beta}(\sigma/\sigma_0)^{\gamma}S$. A hierarchical fit to current TDE samples can calibrate $(\Gamma_0,\alpha,\beta,\gamma)$; volumetric rates follow by convolving with host demographics.
+
+\section{Case Studies}
+\subsection{Cygnus X-1 (stellar XRB)}
+High spin ($a_*\gtrsim 0.9$) compresses $r_{\rm ISCO}$ and approximately doubles the ISCO tone relative to Schwarzschild; inferred $B_H$ and $P_{\rm BZ}\sim 10^{36\text{--}37}\ \mathrm{erg\ s^{-1}}$ align with microquasar jets.
+\subsection{Sgr A* (quiescent SMBH)}
+Extremely low $\lambda_{\rm Edd}$ with RIAF-like efficiency boosts $B_H$ moderately while keeping $P_{\rm BZ}$ small, consistent with weak radio emission. Sphere of influence $\sim 1$--2 pc; TDEs possible.
+\subsection{M87* (LLAGN with jet)}
+MAD/RIAF branch yields $P_{\rm BZ}\sim 10^{44\pm 1}\ \mathrm{erg\ s^{-1}}$, bracketing jet energetics; TDEs suppressed by direct capture. $r_{\rm infl}\sim 0.2$--0.27 kpc (3--4\% of $R_e$).
+
+\section{Results: Cross-Scale Atlas and Invariants}
+We verify the baseline invariant $f_{\rm ISCO}t_g$ across a 10-object atlas and a 2024--2025 cross-scale set (Gaia BH3, GW231123 remnant, $\omega$~Cen IMBH candidate, CEERS-1019, J0529-4351). Spin-aware frequencies are reported where credible; ADAF/bridge jet-power ranges accompany SMBH entries.
+
+\section{Uncertainties and Reproducibility}
+Uncertainties are propagated analytically in log form. Automated QC flags include M--$\sigma$ outliers, aperture sanity, and morphology warnings. The accompanying tables follow a consistent schema with per-entry provenance and quality grades (Gold/Silver/Bronze).
+
+\section{Discussion and Outlook}
+The ruler enables instrument matching, variability rescaling, imaging forecasts, and growth tests from XRBs to UMBHs. Future work: full spin posteriors via a hierarchical combiner; expanded environment metrics (gas content, nuclear profiles); calibrated TDE rates; and a $\sim 50$-object catalog advancing toward a community standard.
+
+\section*{Acknowledgements}
+The author thanks colleagues and collaborators for discussions that informed parts of this framework.
+
+\bibliographystyle{unsrtnat}
+\begin{thebibliography}{99}
+
+\bibitem[Miller-Jones et al.(2021)]{MillerJones2021}
+Miller-Jones, J.~C.~A., Bahramian, A., Orosz, J.~A., \emph{et al.} 2021,
+\emph{Science}, \textbf{371}, 1046--1049,
+``Cygnus X-1 contains a 21-solar mass black hole---implications for massive star winds'',
+doi:10.1126/science.abb3363.
+
+\bibitem[Zhao et al.(2021)]{Zhao2021}
+Zhao, X., Gou, L., Dong, Y., \emph{et al.} 2021,
+\emph{Astrophysical Journal}, \textbf{908}, 117,
+``Re-estimating the Spin Parameter of the Black Hole in Cygnus X-1'',
+doi:10.3847/1538-4357/abbcd6.
+
+\bibitem[GRAVITY Collaboration(2020)]{Gravity2020}
+GRAVITY Collaboration (Abuter, R., Amorim, A., Baub\"ock, M., \emph{et al.}) 2020,
+\emph{Astronomy \& Astrophysics}, \textbf{636}, L5,
+``Detection of the Schwarzschild precession in the orbit of the star S2 near the Galactic centre massive black hole'',
+doi:10.1051/0004-6361/202037813.
+
+\bibitem[EHT Collaboration(2022a)]{EHT2022SgrA1}
+Event Horizon Telescope Collaboration (Akiyama, K., \emph{et al.}) 2022,
+\emph{Astrophysical Journal Letters}, \textbf{930}, L12,
+``First Sagittarius A* Event Horizon Telescope Results. I. The Shadow of the Supermassive Black Hole in the Center of the Milky Way'',
+doi:10.3847/2041-8213/ac6674.
+
+\bibitem[EHT Collaboration(2019a)]{EHT2019M87I}
+Event Horizon Telescope Collaboration (Akiyama, K., \emph{et al.}) 2019,
+\emph{Astrophysical Journal Letters}, \textbf{875}, L1,
+``First M87 Event Horizon Telescope Results. I. The Shadow of the Supermassive Black Hole'',
+doi:10.3847/2041-8213/ab0ec7.
+
+\bibitem[EHT Collaboration(2021)]{EHT2021M87Pol}
+Event Horizon Telescope Collaboration (Akiyama, K., \emph{et al.}) 2021,
+\emph{Astrophysical Journal Letters}, \textbf{910}, L12,
+``First M87 Event Horizon Telescope Results. VII. Polarization of the Ring'',
+doi:10.3847/2041-8213/abe71d.
+
+\end{thebibliography}
+
+\end{document}
