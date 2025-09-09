@@ -8,8 +8,8 @@ authors:
 date-released: 2025-09-01
 version: v1.0.0
 identifiers:
-  - type: doi
-    value: 10.0000/placeholder.doi  # replace when you have one
+  - type: xxxx.xxxxxx
+    value: xxxx.xxxxxx
 repository-code: https://github.com/SNagy3/BHRuler
 preferred-citation:
   type: article
