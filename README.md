@@ -1,4 +1,4 @@
-# BHRuler
+# Black Hole Ruler
 A scale-invariant framework and reproducible dataset for comparing black holes across the mass spectrum (Nagy 2025).
 
 Stephen L. Nagy · Independent Researcher · September 2025  
