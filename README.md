@@ -107,10 +107,6 @@ BHRuler/
 ├─ LICENSE
 └─ CITATION.cff
 
-````
-
-> **Note:** File names in `data/` are illustrative—keep the same columns even if you rename.
-
 ---
 
 ## Quick Start
