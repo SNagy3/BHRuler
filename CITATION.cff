@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+title: BHRuler — A Scale-Invariant Ruler for Black Holes
+message: If you use this work, please cite it using the metadata below.
+type: article
+authors:
+  - family-names: Nagy
+    given-names: Stephen L.
+date-released: 2025-09-01
+version: v1.0.0
+identifiers:
+  - type: doi
+    value: 10.0000/placeholder.doi  # replace when you have one
+repository-code: https://github.com/SNagy3/BHRuler
+preferred-citation:
+  type: article
+  authors:
+    - family-names: Nagy
+      given-names: Stephen L.
+  title: A Scale-Invariant Ruler for Black Holes: From Stellar-Mass to Ultra-Massive with Unified Uncertainties 
+  year: 2025
