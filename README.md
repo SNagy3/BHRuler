@@ -171,13 +171,21 @@ Each CSV includes a brief header and column units. Keep provenance in a companio
 ## Schema (V1)
 
 **Core:** `name, type, z, distance, M, M_err, anchor_method, mass_ref, a_star, a_ref, quality_grade, use_in_fits`
+
 **Ruler:** `t_g, r_s, f_ISCO_schw, fISCO_tg_invariant`
+
 **Spin-aware:** `r_ISCO_a, f_ISCO_a, f_ratio`
+
 **Accretion:** `L_Edd, L_band, L_bol, lambda_Edd, eta_eff, branch{eta_bridge|ADAF}, kappa`
+
 **Magnetics/Jets:** `B_H, phi_BH, P_BZ_pred, P_BZ_low, P_BZ_high, branch_recommendation, jet_power_ref`
+
 **Environment:** `sigma, sigma_err, sigma_source, sigma_aperture, sigma_ref, k_factor, k_source, Re, Re_err, morph_type, bar_flag, morphology_warning, rinfl, rinfl_err, rinfl_over_Re`
+
 **TDE:** `tde_flag{disrupt|swallow}, Mcrit_est, tfb_days, Gamma_gal, Gamma_err, rate_method, rate_params_ref`
+
 **Imaging (if any):** `theta_shadow, image_band, baseline_req, polarization_frac, EHT_ref`
+
 **Versions:** `framework_version, catalog_version, row_version, last_updated, notes`
 
 ---
