@@ -1,0 +1,167 @@
+# BHRuler Equations 
+**Author:** Stephen L. Nagy · **Affiliation:** Independent Researcher  
+**Date:** September 2025 · **Version:** 1.0.0
+
+This note lists the exact equations implemented by **BHRuler** (as in `bhruler.py` / `bhruler_nopandas.py`), and how they map to the output columns.
+
+---
+
+## Notation and constants
+
+**Symbols:**  
+- \(M\): black-hole mass  
+- \(a_*\in[-1,1]\): dimensionless spin (prograde \(>0\), retrograde \(<0\))  
+- \(\lambda_{\rm Edd}=L_{\rm bol}/L_{\rm Edd}\): Eddington ratio (user input)  
+- \(\eta_{\rm eff}\): effective radiative efficiency (user input for η-bridge)  
+- \(\kappa\): ADAF/RIAF proportionality (\(\lambda_{\rm Edd}=\kappa \dot m^2\), user input)  
+- \(\sigma\): stellar velocity dispersion (km s\(^{-1}\))  
+- \(R_e\): galaxy effective radius (kpc)
+
+**Physical constants (SI):**  
+\(G=6.67430\times10^{-11}\ {\rm m^3\,kg^{-1}\,s^{-2}},\;
+c=2.99792458\times10^{8}\ {\rm m\,s^{-1}},\;
+M_\odot=1.98847\times10^{30}\ {\rm kg},\;
+1\,{\rm pc}=3.08567758\times10^{16}\,{\rm m}.\)
+
+---
+
+## 1) Core gravitational scalings
+
+**Gravitational time/length:**
+$$
+t_g=\frac{GM}{c^3},\qquad
+r_g=\frac{GM}{c^2},\qquad
+r_s=2\,r_g=\frac{2GM}{c^2}.
+$$
+
+**Schwarzschild ISCO baseline:**
+$$
+r_{\rm ISCO}^{\rm Schw}=6\,r_g,\qquad
+f_{\rm ISCO}^{\rm Schw}=\frac{c^3}{6^{3/2}\,2\pi\,GM}.
+$$
+
+**Mass-invariant sanity check (dimensionless):**
+$$
+f_{\rm ISCO}^{\rm Schw}\,t_g=\frac{1}{6^{3/2}\,2\pi}\approx 0.01083.
+$$
+
+---
+
+## 2) Kerr spin corrections (equatorial orbits)
+
+**Bardeen–Press–Teukolsky ISCO radius (in \(r_g\) units):**
+$$
+\begin{aligned}
+Z_1&=1+\big(1-a_*^2\big)^{1/3}\!\left[(1+a_*)^{1/3}+(1-a_*)^{1/3}\right],\\
+Z_2&=\sqrt{3a_*^2+Z_1^2},\\
+r_{\rm ISCO}(a_*)&=
+\begin{cases}
+3+Z_2-\sqrt{(3-Z_1)(3+Z_1+2Z_2)} & \text{(prograde)}\\
+3+Z_2+\sqrt{(3-Z_1)(3+Z_1+2Z_2)} & \text{(retrograde)}
+\end{cases}
+\end{aligned}
+$$
+
+**ISCO frequency (explicit branch sign):**
+$$
+f_{\rm ISCO}(a_*)=\frac{c^3}{2\pi GM}\times
+\begin{cases}
+\dfrac{1}{r_{\rm ISCO}^{3/2}(a_*)+a_*}, & \text{prograde}\\[6pt]
+\dfrac{1}{r_{\rm ISCO}^{3/2}(a_*)-a_*}, & \text{retrograde}
+\end{cases}
+$$
+
+**Diagnostic ratio:**
+$$
+\frac{f_{\rm ISCO}^{\rm Kerr}}{f_{\rm ISCO}^{\rm Schw}}.
+$$
+
+---
+
+## 3) Accretion prescriptions (toggle)
+
+### (a) η-bridge (efficient/thin-disk–like)
+Dimensionless accretion rate and horizon magnetic field:
+$$
+\dot m=\frac{\lambda_{\rm Edd}}{\eta_{\rm eff}},\qquad
+B_H \simeq 4\times10^{4}\ {\rm G}\;\dot m^{1/2}\left(\frac{10^9M_\odot}{M}\right)^{1/2}.
+$$
+*Normalization is MAD-inspired (order-of-magnitude); the key physics is the scaling \(B_H\propto \dot m^{1/2}M^{-1/2}\).*
+
+### (b) ADAF/RIAF
+$$
+\lambda_{\rm Edd}=\kappa\,\dot m^2 \ \Rightarrow\ 
+\dot m=\sqrt{\frac{\lambda_{\rm Edd}}{\kappa}},\qquad
+B_H \simeq 4\times10^{4}\ {\rm G}\;\dot m^{1/2}\left(\frac{10^9M_\odot}{M}\right)^{1/2}.
+$$
+
+### (c) Blandford–Znajek jet power (order-of-magnitude)
+$$
+P_{\rm BZ}\approx 10^{45}\ {\rm erg\,s^{-1}}
+\left(\frac{a_*}{0.9}\right)^{2}
+\left(\frac{B_H}{10^{4}\,{\rm G}}\right)^{2}
+\left(\frac{M}{10^{9}M_\odot}\right)^{2}.
+$$
+
+---
+
+## 4) Environment and host coupling
+
+**Sphere of influence and host-normalized ratio:**
+$$
+r_{\rm infl}=\frac{GM}{\sigma^2},\qquad
+\frac{r_{\rm infl}}{R_e}.
+$$
+
+*(If \(R_e\) is not provided, only \(r_{\rm infl}\) is reported.)*
+
+---
+
+## 5) Tidal-disruption (TDE) scalings
+
+**Fallback time (solar-type star):**
+$$
+t_{\rm fb}\approx 41~{\rm d}\;
+\left(\frac{M}{10^{6}M_\odot}\right)^{1/2}
+\left(\frac{R_*}{R_\odot}\right)^{3/2}
+\left(\frac{M_*}{M_\odot}\right)^{-1}.
+$$
+
+**Spin-aware logistic capture boundary (for the TDE flag):**
+$$
+S(M;a_*)=\frac{1}{1+\exp\!\left(-\frac{\log_{10}M-\log_{10}M_{\rm crit}(a_*)}{w}\right)},\qquad
+M_{\rm crit}(a_*)=M_{\rm crit,0}\,[1-0.6\,a_*],
+$$
+with defaults \(M_{\rm crit,0}=3\times10^{7}M_\odot\) and \(w=0.15\) dex.  
+We label **`tde_possible = true`** when \(S<0.5\).
+
+---
+
+## 6) Output column mapping (from the scripts)
+
+**Core & spin:**  
+`t_g_s, r_s_km, f_ISCO_Schw_Hz, r_ISCO_rg, f_ISCO_Kerr_Hz, f_ratio`
+
+**Accretion / jets (per branch):**  
+`B_H_G_eta, P_BZ_erg_s_eta` and/or `B_H_G_adaf, P_BZ_erg_s_adaf`
+
+**Environment:**  
+`sigma_kms, Re_kpc, rinfl_pc, rinfl_over_Re`
+
+**TDE:**  
+`t_fb_days, tde_possible`
+
+---
+
+## 7) Built-in validation checks
+- **Invariant:** \(f_{\rm ISCO}^{\rm Schw}\,t_g\) ≈ 0.01083 (flat in \(M\)).  
+- **Spin effect:** \(f_{\rm ISCO}^{\rm Kerr}/f_{\rm ISCO}^{\rm Schw}\) increases monotonically with prograde \(a_*\).  
+- **Unit sanity:** \(r_s=2r_g\); \(r_{\rm infl}\propto M/\sigma^2\).
+
+---
+
+## References (core methods)
+- Bardeen, Press & Teukolsky (1972) — Kerr geodesics/ISCO  
+- Blandford & Znajek (1977) — Jet power extraction  
+- GRAVITY Collaboration (2020) — S2 precession, Sgr A\* dynamics  
+- EHT Collaboration (2019, 2021, 2022) — M87\*, Sgr A\* imaging and polarization
