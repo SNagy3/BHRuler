@@ -3,7 +3,7 @@ message: "If you use this software, please cite it as below."
 type: software
 title: "BHRuler: A Scale-Invariant Ruler for Black Holes"
 version: "2.1"
-doi:  {10.5281/zenodo.18894798}
+doi: "10.5281/zenodo.18894798"
 date-released: "2025-09-01" V2-"2026-3-6"
 url: "https://github.com/SNagy3/BHRuler"
 repository-code: "https://github.com/SNagy3/BHRuler"
