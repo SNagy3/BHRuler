@@ -4,7 +4,8 @@
 
 A scale-invariant framework and reproducible dataset for comparing black holes across the mass spectrum (Nagy 2025).
 
-**Stephen L. Nagy · Independent Researcher · September 2025**
+**Stephen L. Nagy · Independent Researcher · September 2025 - Current**
+
 *A Scale-Invariant Ruler for Black Holes: From Stellar-Mass to Ultra-Massive with Unified Uncertainties*
 **License:** MIT
 
