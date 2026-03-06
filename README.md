@@ -103,42 +103,6 @@ TDE capture boundary: logistic S(M; a*) with tunable midpoint and width.
 
 ---
 
-## Repository Layout
-
-```
-BHRuler/
-├─ Paper/                           # LaTeX source and figures
-│  ├─ Black_Hole_Ruler_V2_2025.tex  # Revised paper (V2.1)
-│  ├─ Black_Hole_Ruler_V2_2025.pdf  # Compiled PDF
-│  ├─ Black_Hole_Ruler_V1_2025.tex  # Original V1 (archived)
-│  ├─ Equations.tex                 # Standalone equations reference
-│  └─ figures/                      # Figure PDFs and generation scripts
-│     ├─ fig1_invariant.{pdf,py}
-│     ├─ fig2_spin.{pdf,py}
-│     ├─ fig3_m87_sensitivity.{pdf,py}
-│     ├─ fig4_atlas.{pdf,py}
-│     └─ fig5_uncertainty.{pdf,py}
-├─ data/                            # CSVs used in the paper & examples
-│  ├─ bh_ruler_check_2025.csv
-│  ├─ bh_spin_aware_ISCO_2025.csv
-│  ├─ bh_trio_spin_field_jet_2025.csv
-│  ├─ M87_RIAF_sensitivity_2025.csv
-│  ├─ M87__jet-power_sensitivity_to_RIAF_prescription.csv
-│  ├─ bh_ruler_env_SgrA_M87_V1.csv
-│  └─ bh_ruler_env_v0_4_alpha_SgrA_M87.csv
-├─ src/                             # Modular Python implementations
-│  ├─ ruler.py
-│  ├─ accretion.py
-│  ├─ environment.py
-│  └─ tde.py
-├─ Notebooks/                       # Optional demos
-├─ bhruler.py                       # Single-file CLI tool
-├─ Using_BHRuler.md                 # User guide
-├─ CITATION.cff
-├─ CHANGELOG.md
-├─ LICENSE
-└─ README.md
-```
 
 ---
 
