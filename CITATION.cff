@@ -1,21 +1,34 @@
 cff-version: 1.2.0
-title: "BHRuler — A Scale-Invariant Ruler for Black Holes (V1)"
-message: "If you use this software or data, please cite it as below."
-version: "v1.0.2"
-date-released: "2025-09-09"
+message: "If you use this software, please cite it as below."
+type: software
+title: "BHRuler: A Scale-Invariant Ruler for Black Holes"
+version: "2.1"
+date-released: "2025-09-01"
+url: "https://github.com/SNagy3/BHRuler"
+repository-code: "https://github.com/SNagy3/BHRuler"
+license: MIT
 authors:
   - family-names: "Nagy"
     given-names: "Stephen L."
     affiliation: "Independent Researcher"
-license: "MIT"
-repository-code: "https://github.com/SNagy3/BHRuler"
-
-preferred-citation:
-  type: article
-  title: "A Scale-Invariant Ruler for Black Holes: From Stellar-Mass to Ultra-Massive with Unified Uncertainties (V1)"
-  authors:
-    - family-names: "Nagy"
-      given-names: "Stephen L."
-  year: 2025
-  journal: "awaiting"
-
+keywords:
+  - black holes
+  - astrophysics
+  - general relativity
+  - accretion
+  - jets
+  - scale-invariant
+  - Kerr
+  - ISCO
+  - tidal disruption events
+abstract: >-
+  BHRuler is a scale-invariant framework for comparing black holes
+  across the mass spectrum, from stellar-mass X-ray binaries to
+  ultra-massive black holes. It computes gravitational units, spin-aware
+  ISCO frequencies via Bardeen-Press-Teukolsky, dual accretion
+  prescriptions (efficiency bridge and ADAF/RIAF), MAD-motivated
+  horizon magnetic fields, Blandford-Znajek jet powers, sphere of
+  influence, and tidal disruption diagnostics with a tunable logistic
+  capture boundary. Includes a single-file CLI tool, computed data
+  tables, and a revised paper with five figures, 45 references, and
+  worked uncertainty propagation.
