@@ -285,6 +285,29 @@ If you use BHRuler or the accompanying datasets in your work, please cite:
   url          = {https://github.com/SNagy3/BHRuler},
   note         = {BHRuler software, data, and paper}
 }
+
+topics:
+black-holes
+astrophysics
+astronomy
+general-relativity
+gravitational-waves
+agn
+x-ray-binaries
+accretion
+relativistic-jets
+kerr-metric
+isco
+python
+scientific-computing
+scientific-python
+data-science
+simulation
+reproducible-research
+research
+space
+cosmology
+
 ```
 
 ---
