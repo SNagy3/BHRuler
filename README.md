@@ -1,5 +1,7 @@
 # Black Hole Ruler
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18894798.svg)](https://doi.org/10.5281/zenodo.18894798)
+
+
 A scale-invariant framework and reproducible dataset for comparing black holes across the mass spectrum (Nagy 2025).
 
 **Stephen L. Nagy · Independent Researcher · September 2025**
