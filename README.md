@@ -12,8 +12,6 @@ BHRuler implements the **Black Hole Ruler** framework for **scale-invariant**, *
 
 The single-file CLI, `bhruler.py`, now also supports direct ingestion of the **Survey V2** CSV format, including fields such as `Name`, `Class`, `Mass_Msun`, `Spin_a`, `Spin_Known`, and `Regime`, while preserving the standard BHRuler schema for pipeline use.
 
----
-
 ## What's New in V2.1.1-survey
 
 - **Native Survey V2 CSV support** in `bhruler.py`
@@ -31,7 +29,7 @@ The single-file CLI, `bhruler.py`, now also supports direct ingestion of the **S
 - **Direct Survey V2 workflow**:
   ```bash
   python bhruler.py --input 50_BH_Survey_V2_verified.csv --branch core --output survey_out.csv
-````
+  ```
 
 ## What's New in V2
 
