@@ -8,12 +8,17 @@ from stellar-mass X-ray binaries to ultra-massive black holes.
 Usage:
   python bhruler.py --output out.csv
   python bhruler.py --input objects.csv --branch both --output derived.csv
+  python bhruler.py --input 50_BH_Survey_V2_verified.csv --branch core --output survey_out.csv
   python bhruler.py --version
 
 Input CSV columns (case-insensitive, extra columns ignored):
-  name, M_Msun, a_star, lambda_Edd, eta_eff, kappa, sigma_kms, Re_kpc, branch
+  Standard schema:
+    name, M_Msun, a_star, lambda_Edd, eta_eff, kappa, sigma_kms, Re_kpc, branch
+  Survey V2 aliases also supported:
+    Name, Class, Mass_Msun, Spin_a, Spin_Known, Regime
 
 Branch options:
+  - core       : computes mass/spin/timing/ISCO/TDE quantities only
   - eta_bridge : uses dotm = lambda_Edd / eta_eff
   - adaf       : uses lambda_Edd = kappa * dotm^2  (=> dotm = sqrt(lambda_Edd / kappa))
   - both       : computes both and outputs columns with suffixes _eta and _adaf
@@ -39,12 +44,12 @@ References:
   https://github.com/SNagy3/BHRuler
 """
 
-__version__ = "2.1.0"
+__version__ = "2.1.1-survey"
 __author__ = "Stephen L. Nagy"
 
 import argparse
 import math
-import sys
+import re
 from typing import Optional, Dict, Any, List, Tuple
 
 import pandas as pd
@@ -270,10 +275,16 @@ def tde_possible_bool(M_Msun: float, a_star: float, Mcrit0: float = 3e7) -> bool
 # Input parsing helpers — flexible column-name resolution
 # ===========================================================================
 
+def _norm_key(key: str) -> str:
+    """Normalize a column name for tolerant matching across CSV schemas."""
+    return re.sub(r"[^a-z0-9]+", "", str(key).strip().lower())
+
+
 def _get_flex(obj: Dict[str, Any], *keys: str) -> Any:
-    """Return the first non-None value found under any of the given keys."""
+    """Return the first non-empty value found under any of the given keys."""
+    lookup = {_norm_key(k): v for k, v in obj.items()}
     for k in keys:
-        v = obj.get(k)
+        v = lookup.get(_norm_key(k))
         if v is not None and v != "":
             return v
     return None
@@ -312,11 +323,11 @@ def compute_row(obj: Dict[str, Any], branch: str,
     Parameters
     ----------
     obj : dict
-        Input parameters.  Recognized keys (case-sensitive):
-        name, M_Msun (or M, mass_Msun), a_star (or spin), lambda_Edd (or lambda),
-        eta_eff, kappa, sigma_kms, Re_kpc.
+        Input parameters.  Recognized keys (case-insensitive after normalization):
+        name / Name, M_Msun / Mass_Msun / M, a_star / Spin_a / spin,
+        lambda_Edd / lambda, eta_eff, kappa, sigma_kms, Re_kpc.
     branch : str
-        'eta_bridge', 'adaf', or 'both'.
+        'core', 'eta_bridge', 'adaf', or 'both'.
     tde_mcrit : float
         Logistic capture midpoint [M_sun].
     tde_width : float
@@ -328,35 +339,49 @@ def compute_row(obj: Dict[str, Any], branch: str,
         Derived quantities.  See module docstring for column definitions.
     """
     # ---- Parse inputs with flexible synonym support ----
-    # Handles column names from both the schema spec and the computed data CSVs.
-    name  = _get_flex(obj, "name", "Name", "Object", "object")
-    M     = _float_flex(obj, "M_Msun", "M", "mass_Msun", "Mass [M_sun]",
-                        "M [M_sun]", "M [Msun]")
-    a     = _float_flex(obj, "a_star", "spin", "Spin a_* (prograde)",
+    # Handles both the standard BHRuler schema and Survey V2 exports.
+    name       = _get_flex(obj, "name", "Name", "Object", "object")
+    obj_class  = _get_flex(obj, "Class")
+    spin_known = _get_flex(obj, "Spin_Known")
+    regime     = _get_flex(obj, "Regime")
+    survey_like = any(_get_flex(obj, k) is not None for k in (
+        "Mass_Msun", "Spin_a", "Invariant_fISCO_tg", "Orbital_Period_s"
+    ))
+
+    M     = _float_flex(obj, "M_Msun", "Mass_Msun", "M", "mass_Msun",
+                        "Mass [M_sun]", "M [M_sun]", "M [Msun]")
+    a     = _float_flex(obj, "a_star", "Spin_a", "spin", "Spin a_* (prograde)",
                         "a_* (assumed/est.)", default=0.0)
-    lam   = _float_flex(obj, "lambda_Edd", "lambda", "L/L_Edd (assumed)",
+    lam   = _float_flex(obj, "lambda_Edd", "lambda", "L/L_Edd", "L/L_Edd (assumed)",
                         default=0.0)
-    eta   = _float_or_none(obj, "eta_eff")
+    eta   = _float_or_none(obj, "eta_eff", "eta")
     kap   = _float_or_none(obj, "kappa")
-    sigma = _float_or_none(obj, "sigma_kms", "sigma [km/s]")
-    Re    = _float_or_none(obj, "Re_kpc", "R_e [kpc]")
+    sigma = _float_or_none(obj, "sigma_kms", "sigma [km/s]", "sigma")
+    Re    = _float_or_none(obj, "Re_kpc", "R_e [kpc]", "Re")
 
     # ---- Core ruler (mass only) ----
     tg  = t_g_seconds(M)
     f_s = f_isco_schwarz_hz(M)
 
     out = {
-        "name":             name,
-        "M_Msun":           M,
-        "a_star":           a,
-        "lambda_Edd":       lam,
-        "sigma_kms":        sigma,
-        "Re_kpc":           Re,
-        "t_g_s":            tg,
-        "r_s_km":           r_s_m(M) / 1e3,
-        "f_ISCO_Schw_Hz":   f_s,
+        "name":               name,
+        "M_Msun":             M,
+        "a_star":             a,
+        "lambda_Edd":         lam,
+        "sigma_kms":          sigma,
+        "Re_kpc":             Re,
+        "t_g_s":              tg,
+        "r_s_km":             r_s_m(M) / 1e3,
+        "f_ISCO_Schw_Hz":     f_s,
         "fISCO_tg_invariant": f_s * tg,   # should equal FISCO_TG_INVARIANT ≈ 0.01083
     }
+
+    if obj_class is not None:
+        out["Class"] = obj_class
+    if spin_known is not None:
+        out["Spin_Known"] = spin_known
+    if regime is not None:
+        out["Regime"] = regime
 
     # ---- Spin-aware ISCO (Kerr) ----
     f_kerr, r_isco_rg = f_isco_kerr_hz(M, a, prograde=True)
@@ -365,6 +390,17 @@ def compute_row(obj: Dict[str, Any], branch: str,
         "f_ISCO_Kerr_Hz":   f_kerr,
         "f_ratio":          f_kerr / f_s,
     })
+
+    if survey_like:
+        out.update({
+            "Name":                  name,
+            "Mass_Msun":             M,
+            "Spin_a":                a,
+            "Grav_Time_tg_s":        tg,
+            "Schwarzschild_Rad_km":  r_s_m(M) / 1e3,
+            "Orbital_Period_s":      (1.0 / f_kerr) if f_kerr > 0 else float("nan"),
+            "Invariant_fISCO_tg":    f_s * tg,
+        })
 
     # ---- Environment ----
     rinfl = r_infl_pc(M, sigma)
@@ -412,15 +448,16 @@ def main():
     ap.add_argument("--version", action="version", version=f"BHRuler {__version__}")
     ap.add_argument(
         "--input",
-        help="Input CSV (columns: name, M_Msun, a_star, lambda_Edd, eta_eff, kappa, "
-             "sigma_kms, Re_kpc, branch).  If omitted, runs built-in demo trio.",
+        help="Input CSV. Supports the standard BHRuler schema plus Survey V2 aliases "
+             "(Name, Class, Mass_Msun, Spin_a, Spin_Known, Regime). "
+             "If omitted, runs built-in demo trio.",
         default=None,
     )
     ap.add_argument(
         "--branch",
-        choices=["eta_bridge", "adaf", "both"],
+        choices=["core", "eta_bridge", "adaf", "both"],
         default="both",
-        help="Accretion prescription to compute (default: both).",
+        help="Computation mode: core geometry only, or one/both accretion prescriptions (default: both).",
     )
     ap.add_argument("--output", default="bhruler_output.csv", help="Output CSV path.")
     ap.add_argument(
