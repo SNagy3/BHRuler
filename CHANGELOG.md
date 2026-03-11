@@ -2,6 +2,53 @@
 
 All notable changes to the BHRuler project.
 
+## [2.1.1-survey] - 2026-03 (Survey integration update)
+
+### Repository
+
+#### Added
+- Native support for **Survey V2 CSV schema** in `bhruler.py`, including aliases for:
+  - `Name`
+  - `Class`
+  - `Mass_Msun`
+  - `Spin_a`
+  - `Spin_Known`
+  - `Regime`
+- New **`core` branch** for mass/spin/timing/ISCO/TDE computations without requiring accretion inputs (`lambda_Edd`, `eta_eff`, `kappa`)
+- Survey-compatible output aliases written alongside the standard BHRuler schema:
+  - `Name`
+  - `Mass_Msun`
+  - `Spin_a`
+  - `Grav_Time_tg_s`
+  - `Schwarzschild_Rad_km`
+  - `Orbital_Period_s`
+  - `Invariant_fISCO_tg`
+- Pass-through preservation of survey metadata fields (`Class`, `Spin_Known`, `Regime`) in output tables
+
+#### Changed
+- Input parsing made more tolerant across mixed CSV schemas by normalizing column matching over:
+  - case differences
+  - spaces
+  - underscores
+  - punctuation
+- CLI usage and help text updated to document direct Survey V2 ingestion
+- Recommended survey workflow updated to:
+  - `python bhruler.py --input 50_BH_Survey_V2_verified.csv --branch core --output survey_out.csv`
+- Output now includes both:
+  - canonical BHRuler field names for pipeline compatibility
+  - survey-style aliases for easier round-trip comparison with Survey V2 tables
+
+#### Fixed
+- Fixed failure to ingest Survey V2 files caused by schema mismatches between:
+  - `Mass_Msun` vs `M_Msun`
+  - `Spin_a` vs `a_star`
+- Fixed brittle CSV parsing for alternate user/export naming conventions
+- Fixed survey execution path so datasets without accretion parameters no longer produce unnecessary branch warnings when run with `--branch core`
+
+#### Validated
+- Replacement `bhruler.py` successfully executed on the full **49-row Survey V2 dataset**
+- Generated survey output preserves the invariant check and produces the expected combined standard + survey-compatible columns
+
 ## [2.1] - 2025-09 (Paper revision)
 
 ### Paper (V2.1)
