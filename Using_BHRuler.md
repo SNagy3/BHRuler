@@ -567,5 +567,3 @@ Example code reference:
 ---
 
 That’s it. Drop in a CSV, choose a branch, and you’ll get a tidy table of derived scales, spin-aware frequencies, jet-power brackets, and simple environment/TDE diagnostics—consistent across XRBs, SMBHs, and survey-style catalogs.
-
-```
