@@ -1,163 +1,382 @@
 \documentclass[12pt]{article}
-\usepackage{amsmath, amssymb}
+\usepackage{amsmath, amssymb, bm}
 \usepackage{geometry}
-\geometry{margin=1in}
 \usepackage{hyperref}
+\geometry{margin=1in}
 
 \begin{document}
 
 \title{BHRuler Equations}
 \author{Stephen L. Nagy \\ \small{Independent Researcher}}
-\date{September 2025 \\ Version 1.0.0}
+\date{March 2026 \\ Version 2.1.1-survey}
 \maketitle
 
 \section*{Introduction}
-This note lists the exact equations implemented by \textbf{BHRuler} (as in \texttt{bhruler.py}), and how they map to the output columns.
 
-\section*{Notation and Constants}
-\textbf{Symbols:}
+This note lists the equations currently implemented by \textbf{BHRuler} (the single-file
+\texttt{bhruler.py}) and maps them to the output columns written by the code.
+
+This document is intentionally limited to \emph{implemented} framework math:
+\begin{itemize}
+    \item gravitational scales and the Schwarzschild ISCO invariant,
+    \item Kerr spin corrections via Bardeen--Press--Teukolsky,
+    \item dual accretion prescriptions ($\eta$-bridge and ADAF/RIAF),
+    \item horizon magnetic field and Blandford--Znajek jet-power scaling,
+    \item environment metrics,
+    \item TDE fallback and the logistic capture boundary.
+\end{itemize}
+
+Paper-level discussion that is not yet a first-class code output (for example, the full uncertainty-propagation machinery) is not treated here as implemented CLI math.
+
+\section*{Notation and Inputs}
+
 \begin{itemize}
     \item $M$: black-hole mass
-    \item $a_* \in [-1,1]$: dimensionless spin (prograde $>0$, retrograde $<0$)
-    \item $\lambda_{\rm Edd} = L_{\rm bol}/L_{\rm Edd}$: Eddington ratio (user input)
-    \item $\eta_{\rm eff}$: effective radiative efficiency (user input for $\eta$-bridge)
-    \item $\kappa$: ADAF/RIAF proportionality ($\lambda_{\rm Edd} = \kappa \dot m^2$, user input)
-    \item $\sigma$: stellar velocity dispersion (km s$^{-1}$)
-    \item $R_e$: galaxy effective radius (kpc)
+    \item $a_* \in [-1,1]$: dimensionless spin parameter
+    \item $\lambda_{\rm Edd} \equiv L_{\rm bol}/L_{\rm Edd}$: Eddington ratio
+    \item $\eta_{\rm eff}$: effective radiative efficiency
+    \item $\kappa$: ADAF/RIAF proportionality constant defined by
+    \[
+    \lambda_{\rm Edd} = \kappa \dot m^2
+    \]
+    \item $\dot m$: dimensionless accretion rate
+    \item $\sigma$: stellar velocity dispersion
+    \item $R_e$: galaxy effective radius
+    \item $R_*, M_*$: stellar radius and stellar mass for the fallback-time scaling
 \end{itemize}
 
 \section*{Physical Constants (SI)}
-\begin{center}
-\begin{tabular}{ll}
-$G$ & $6.67430\times10^{-11}\ {\rm m^3\,kg^{-1}\,s^{-2}}$ \\
-$c$ & $2.99792458\times10^{8}\ {\rm m\,s^{-1}}$ \\
-$M_\odot$ & $1.98847\times10^{30}\ {\rm kg}$ \\
-$1\,{\rm pc}$ & $3.09 \times 10^{16}\,{\rm m}$ \\
-\end{tabular}
-\end{center}
+
+\[
+G = 6.67430\times10^{-11}\ {\rm m^3\,kg^{-1}\,s^{-2}}
+\]
+\[
+c = 2.99792458\times10^{8}\ {\rm m\,s^{-1}}
+\]
+\[
+M_\odot = 1.98847\times10^{30}\ {\rm kg}
+\]
+\[
+1\,{\rm pc} = 3.085677581491367\times10^{16}\ {\rm m}
+\]
 
 \section{Core Gravitational Scalings}
-\textbf{Gravitational time/length:}
+
+\subsection*{Gravitational time and length}
 \[
-t_g = \frac{GM}{c^3},\qquad
-r_g = \frac{GM}{c^2},\qquad
+t_g = \frac{GM}{c^3},
+\qquad
+r_g = \frac{GM}{c^2},
+\qquad
 r_s = 2r_g = \frac{2GM}{c^2}.
 \]
 
-\textbf{Schwarzschild ISCO baseline:}
+\subsection*{Schwarzschild ISCO baseline}
 \[
-r_{\rm ISCO}^{\rm Schw} = 6 r_g,\qquad
-f_{\rm ISCO}^{\rm Schw} = \frac{c^3}{6^{3/2} 2\pi GM}.
+r_{\rm ISCO}^{\rm Schw} = 6r_g
+\]
+\[
+f_{\rm ISCO}^{\rm Schw} = \frac{c^3}{6^{3/2}\,2\pi GM}.
 \]
 
-\textbf{Mass-invariant sanity check (dimensionless):}
+\subsection*{Mass-invariant sanity check}
+BHRuler evaluates the dimensionless invariant
 \[
-f_{\rm ISCO}^{\rm Schw} t_g = \frac{1}{6^{3/2} 2\pi} \approx 0.01083.
+f_{\rm ISCO}^{\rm Schw} t_g
+= \frac{c^3}{6^{3/2}\,2\pi GM}\cdot\frac{GM}{c^3}
+= \frac{1}{6^{3/2}\,2\pi}
+\approx 0.010829122239.
 \]
 
-\section{Kerr Spin Corrections (Equatorial Orbits)}
-\textbf{Bardeen–Press–Teukolsky ISCO radius (in $r_g$ units):}
+This quantity should be independent of mass and is used as a built-in validation check.
+
+\section{Kerr Spin Corrections (Bardeen--Press--Teukolsky)}
+
+\subsection*{ISCO radius in units of $r_g$}
+Define
 \[
-\begin{aligned}
-Z_1 &= 1 + (1-a_*^2)^{1/3} \left[(1+a_*)^{1/3} + (1-a_*)^{1/3}\right],\\
-Z_2 &= \sqrt{3a_*^2 + Z_1^2},\\
-r_{\rm ISCO}(a_*) &=
+Z_1 = 1 + (1-a_*^2)^{1/3}
+\left[(1+a_*)^{1/3} + (1-a_*)^{1/3}\right],
+\]
+\[
+Z_2 = \sqrt{3a_*^2 + Z_1^2}.
+\]
+
+Then
+\[
+r_{\rm ISCO}(a_*) =
 \begin{cases}
-3 + Z_2 - \sqrt{(3-Z_1)(3+Z_1+2Z_2)} & \text{(prograde)}\\
-3 + Z_2 + \sqrt{(3-Z_1)(3+Z_1+2Z_2)} & \text{(retrograde)}
-\end{cases}
-\end{aligned}
-\]
-
-\textbf{ISCO frequency (explicit branch sign):}
-\[
-f_{\rm ISCO}(a_*) = \frac{c^3}{2\pi GM} \times
-\begin{cases}
-\dfrac{1}{r_{\rm ISCO}^{3/2}(a_*) + a_*}, & \text{prograde}\\[6pt]
-\dfrac{1}{r_{\rm ISCO}^{3/2}(a_*) - a_*}, & \text{retrograde}
+3 + Z_2 - \sqrt{(3-Z_1)(3+Z_1+2Z_2)}, & \text{prograde} \\[6pt]
+3 + Z_2 + \sqrt{(3-Z_1)(3+Z_1+2Z_2)}, & \text{retrograde}
 \end{cases}
 \]
+where $r_{\rm ISCO}$ is expressed in units of $r_g=GM/c^2$.
 
-\textbf{Diagnostic ratio:}
+\subsection*{Kerr ISCO orbital frequency}
+For the chosen orbital branch,
 \[
+f_{\rm ISCO}^{\rm Kerr}(a_*) =
+\frac{c^3}{2\pi GM}
+\frac{1}{r_{\rm ISCO}^{3/2}(a_*) \pm a_*},
+\]
+with
+\[
++\ a_* \quad \text{for prograde},
+\qquad
+-\ a_* \quad \text{for retrograde}.
+\]
+
+\subsection*{Spin diagnostic ratio}
+BHRuler reports
+\[
+f_{\rm ratio}
+=
 \frac{f_{\rm ISCO}^{\rm Kerr}}{f_{\rm ISCO}^{\rm Schw}}.
 \]
 
-\section{Accretion Prescriptions (Toggle)}
-\subsection*{(a) $\eta$-bridge (efficient/thin-disk–like)}
-Dimensionless accretion rate and horizon magnetic field:
+The CLI computes the prograde branch by default for its standard output columns.
+
+\subsection*{ISCO orbital period}
+When survey-style output aliases are written, the code also reports
 \[
-\dot m = \frac{\lambda_{\rm Edd}}{\eta_{\rm eff}},\qquad
-B_H \simeq 4\times10^{4}\ {\rm G}\;\dot m^{1/2}\left(\frac{10^9 M_\odot}{M}\right)^{1/2}.
+P_{\rm orb,ISCO} = \frac{1}{f_{\rm ISCO}^{\rm Kerr}}.
 \]
-\textit{Normalization is MAD-inspired (order-of-magnitude); the key physics is the scaling $B_H \propto \dot m^{1/2} M^{-1/2}$.}
+
+\section{Accretion Prescriptions}
+
+BHRuler supports four branch modes:
+\begin{itemize}
+    \item \texttt{core}: geometry, timing, spin, environment, and TDE only
+    \item \texttt{eta\_bridge}: efficient/thin-disk-like accretion
+    \item \texttt{adaf}: radiatively inefficient ADAF/RIAF-like prescription
+    \item \texttt{both}: compute both accretion branches
+\end{itemize}
+
+\subsection*{(a) Efficiency bridge}
+The accretion rate is defined by
+\[
+\dot m = \frac{\lambda_{\rm Edd}}{\eta_{\rm eff}}.
+\]
+
+The horizon magnetic field is modeled as
+\[
+B_H^{(\eta)} \simeq 4\times10^4\ {\rm G}\;
+\dot m^{1/2}
+\left(\frac{10^9 M_\odot}{M}\right)^{1/2}.
+\]
+
+Equivalently,
+\[
+B_H^{(\eta)} \simeq 4\times10^4\ {\rm G}\;
+\left(\frac{\lambda_{\rm Edd}}{\eta_{\rm eff}}\right)^{1/2}
+\left(\frac{10^9 M_\odot}{M}\right)^{1/2}.
+\]
 
 \subsection*{(b) ADAF/RIAF}
+The ADAF closure is
 \[
-\lambda_{\rm Edd} = \kappa \dot m^2 \ \Rightarrow\
-\dot m = \sqrt{\frac{\lambda_{\rm Edd}}{\kappa}},\qquad
-B_H \simeq 4\times10^{4}\ {\rm G}\;\dot m^{1/2}\left(\frac{10^9 M_\odot}{M}\right)^{1/2}.
+\lambda_{\rm Edd} = \kappa \dot m^2
+\quad\Longrightarrow\quad
+\dot m = \sqrt{\frac{\lambda_{\rm Edd}}{\kappa}}.
 \]
 
-\subsection*{(c) Blandford–Znajek jet power (order-of-magnitude)}
+BHRuler uses the same field scaling in terms of $\dot m$,
+\[
+B_H^{(\rm ADAF)} \simeq 4\times10^4\ {\rm G}\;
+\dot m^{1/2}
+\left(\frac{10^9 M_\odot}{M}\right)^{1/2},
+\]
+hence
+\[
+B_H^{(\rm ADAF)} \simeq 4\times10^4\ {\rm G}\;
+\left(\frac{\lambda_{\rm Edd}}{\kappa}\right)^{1/4}
+\left(\frac{10^9 M_\odot}{M}\right)^{1/2}.
+\]
+
+\subsection*{Interpretive note}
+The leading physical dependence in both branches is
+\[
+B_H \propto \dot m^{1/2} M^{-1/2}.
+\]
+The numerical prefactor is treated as MAD-motivated and order-of-magnitude.
+
+\section{Blandford--Znajek Jet Power}
+
+Given a horizon-scale field estimate $B_H$, BHRuler reports the order-of-magnitude jet scaling
 \[
 P_{\rm BZ} \approx 10^{45}\ {\rm erg\,s^{-1}}
-\left(\frac{a_*}{0.9}\right)^{2}
-\left(\frac{B_H}{10^{4}\,{\rm G}}\right)^{2}
-\left(\frac{M}{10^{9}M_\odot}\right)^{2}.
+\left(\frac{a_*}{0.9}\right)^2
+\left(\frac{B_H}{10^4\,{\rm G}}\right)^2
+\left(\frac{M}{10^9M_\odot}\right)^2.
 \]
+
+This is a phenomenological normalization anchored to the usual
+\[
+P_{\rm BZ} \propto a_*^2 \Phi_{\rm BH}^2
+\]
+scaling, with the BHRuler normalization tied to MAD-motivated GRMHD expectations.
 
 \section{Environment and Host Coupling}
-\textbf{Sphere of influence and host-normalized ratio:}
-\[
-r_{\rm infl} = \frac{GM}{\sigma^2},\qquad
-\frac{r_{\rm infl}}{R_e}.
-\]
-\textit{(If $R_e$ is not provided, only $r_{\rm infl}$ is reported.)}
 
-\section{Tidal-Disruption (TDE) Scalings}
-\textbf{Fallback time (solar-type star):}
+\subsection*{Sphere of influence}
 \[
-t_{\rm fb} \approx 41~{\rm d}\;
-\left(\frac{M}{10^{6}M_\odot}\right)^{1/2}
+r_{\rm infl} = \frac{GM}{\sigma^2}.
+\]
+
+In the code this is returned in parsecs.
+
+\subsection*{Host-normalized influence radius}
+If an effective radius is supplied,
+\[
+\frac{r_{\rm infl}}{R_e}
+\]
+is also reported, with the code converting parsecs to kiloparsecs before division.
+
+\section{Tidal-Disruption Scalings}
+
+\subsection*{Fallback time}
+For a solar-type normalization,
+\[
+t_{\rm fb} \approx 41~{\rm d}
+\left(\frac{M}{10^6M_\odot}\right)^{1/2}
 \left(\frac{R_*}{R_\odot}\right)^{3/2}
 \left(\frac{M_*}{M_\odot}\right)^{-1}.
 \]
 
-\textbf{Spin-aware logistic capture boundary (for the TDE flag):}
+The implemented default is $R_*=R_\odot$ and $M_*=M_\odot$.
+
+\subsection*{Logistic TDE capture boundary}
+BHRuler defines a logistic capture factor
 \[
-S(M;a_*) = \frac{1}{1+\exp\left(-\frac{\log_{10}M-\log_{10}M_{\rm crit}(a_*)}{w}\right)},\qquad
-M_{\rm crit}(a_*) = M_{\rm crit,0}[1-0.6\,a_*],
+S(M;a_*) =
+\frac{1}{1+\exp(-x)},
 \]
-with defaults $M_{\rm crit,0} = 3\times10^{7}M_\odot$ and $w = 0.15$ dex.  
-We label \texttt{tde\_possible = true} when $S < 0.5$.
+with
+\[
+x = \frac{\log_{10} M - \log_{10} M_{\rm crit}(a_*)}{w}.
+\]
 
-\section{Output Column Mapping (from the scripts)}
-\textbf{Core \& spin:}  
-\texttt{t\_g\_s}, \texttt{r\_s\_km}, \texttt{f\_ISCO\_Schw\_Hz}, \texttt{r\_ISCO\_rg}, \texttt{f\_ISCO\_Kerr\_Hz}, \texttt{f\_ratio}
+The spin-shifted midpoint is
+\[
+M_{\rm crit}(a_*) = M_{\rm crit,0}\,(1-0.6\,a_*),
+\]
+where the code clamps the spin shift to the interval $a_* \in [0,1]$ for this purpose.
 
-\textbf{Accretion / jets (per branch):}  
-\texttt{B\_H\_G\_eta}, \texttt{P\_BZ\_erg\_s\_eta} and/or \texttt{B\_H\_G\_adaf}, \texttt{P\_BZ\_erg\_s\_adaf}
+Default values:
+\[
+M_{\rm crit,0} = 3\times10^7\,M_\odot,
+\qquad
+w = 0.15\ {\rm dex}.
+\]
 
-\textbf{Environment:}  
-\texttt{sigma\_kms}, \texttt{Re\_kpc}, \texttt{rinfl\_pc}, \texttt{rinfl\_over\_Re}
+The interpretation is:
+\[
+S \rightarrow 0 \quad \text{below the midpoint (disruption favored)},
+\]
+\[
+S \rightarrow 1 \quad \text{above the midpoint (direct capture favored)}.
+\]
 
-\textbf{TDE:}  
-\texttt{t\_fb\_days}, \texttt{tde\_possible}
+The boolean output is
+\[
+\texttt{tde\_possible} = (S < 0.5).
+\]
 
-\section{Built-in Validation Checks}
+\subsection*{Heuristic status}
+The factor $(1-0.6a_*)$ is used as a tunable heuristic rather than a precision GR fit.
+
+\section{Implemented Output Mapping}
+
+\subsection*{Core outputs}
 \begin{itemize}
-    \item \textbf{Invariant:} $f_{\rm ISCO}^{\rm Schw} t_g \approx 0.01083$ (flat in $M$).
-    \item \textbf{Spin effect:} $f_{\rm ISCO}^{\rm Kerr}/f_{\rm ISCO}^{\rm Schw}$ increases monotonically with prograde $a_*$.
-    \item \textbf{Unit sanity:} $r_s = 2r_g$; $r_{\rm infl} \propto M/\sigma^2$.
+    \item \texttt{t\_g\_s} $\leftrightarrow t_g$
+    \item \texttt{r\_s\_km} $\leftrightarrow r_s$
+    \item \texttt{f\_ISCO\_Schw\_Hz} $\leftrightarrow f_{\rm ISCO}^{\rm Schw}$
+    \item \texttt{fISCO\_tg\_invariant} $\leftrightarrow f_{\rm ISCO}^{\rm Schw} t_g$
+\end{itemize}
+
+\subsection*{Spin-aware outputs}
+\begin{itemize}
+    \item \texttt{r\_ISCO\_rg} $\leftrightarrow r_{\rm ISCO}(a_*)/r_g$
+    \item \texttt{f\_ISCO\_Kerr\_Hz} $\leftrightarrow f_{\rm ISCO}^{\rm Kerr}(a_*)$
+    \item \texttt{f\_ratio} $\leftrightarrow f_{\rm ISCO}^{\rm Kerr}/f_{\rm ISCO}^{\rm Schw}$
+\end{itemize}
+
+\subsection*{Environment outputs}
+\begin{itemize}
+    \item \texttt{rinfl\_pc} $\leftrightarrow r_{\rm infl}$
+    \item \texttt{rinfl\_over\_Re} $\leftrightarrow r_{\rm infl}/R_e$
+    \item \texttt{t\_fb\_days} $\leftrightarrow t_{\rm fb}$
+\end{itemize}
+
+\subsection*{TDE output}
+\begin{itemize}
+    \item \texttt{tde\_possible} $\leftrightarrow (S<0.5)$
+\end{itemize}
+
+\subsection*{Accretion and jet outputs}
+\begin{itemize}
+    \item \texttt{B\_H\_G\_eta}, \texttt{P\_BZ\_erg\_s\_eta}
+    \item \texttt{B\_H\_G\_adaf}, \texttt{P\_BZ\_erg\_s\_adaf}
+\end{itemize}
+
+\subsection*{Warning outputs}
+If a requested accretion branch is missing its required parameter, the code writes
+\begin{itemize}
+    \item \texttt{warn\_eta\_bridge}
+    \item \texttt{warn\_adaf}
+\end{itemize}
+and fills the branch-specific outputs with NaNs.
+
+\subsection*{Survey-compatible aliases}
+When survey-like input is detected, the code may also emit alias columns such as
+\begin{itemize}
+    \item \texttt{Name}
+    \item \texttt{Mass\_Msun}
+    \item \texttt{Spin\_a}
+    \item \texttt{Grav\_Time\_tg\_s}
+    \item \texttt{Schwarzschild\_Rad\_km}
+    \item \texttt{Orbital\_Period\_s}
+    \item \texttt{Invariant\_fISCO\_tg}
+\end{itemize}
+for easy round-trip comparison with the Survey V2 table.
+
+\section{Validation Checks}
+
+\begin{itemize}
+    \item \textbf{Invariant check:}
+    \[
+    f_{\rm ISCO}^{\rm Schw} t_g = \frac{1}{6^{3/2}2\pi}
+    \]
+    should remain constant across mass.
+    
+    \item \textbf{Kerr branch check:}
+    prograde spin drives $r_{\rm ISCO}$ downward and raises $f_{\rm ISCO}^{\rm Kerr}$.
+    
+    \item \textbf{Unit check:}
+    \[
+    r_s = 2r_g,
+    \qquad
+    r_{\rm infl}\propto \frac{M}{\sigma^2}.
+    \]
+    
+    \item \textbf{Branch logic check:}
+    \texttt{core} should produce geometry/spin/environment/TDE outputs without requiring
+    $\lambda_{\rm Edd}$, $\eta_{\rm eff}$, or $\kappa$.
 \end{itemize}
 
 \section*{References (Core Methods)}
+
 \begin{itemize}
-    \item Bardeen, Press \& Teukolsky (1972) --- Kerr geodesics/ISCO
-    \item Blandford \& Znajek (1977) --- Jet power extraction
-    \item GRAVITY Collaboration (2020) --- S2 precession, Sgr A* dynamics
-    \item EHT Collaboration (2019, 2021, 2022) --- M87*, Sgr A* imaging and polarization
+    \item Bardeen, Press \& Teukolsky (1972) --- Kerr ISCO and equatorial geodesics
+    \item Blandford \& Znajek (1977) --- electromagnetic extraction of black-hole spin energy
+    \item Shakura \& Sunyaev (1973) --- efficient thin-disk phenomenology
+    \item Narayan \& Yi (1994, 1995) --- ADAF/RIAF scaling
+    \item Tchekhovskoy et al. (2011) --- MAD-saturated GRMHD jet normalization
+    \item McKinney et al. (2012) --- GRMHD jet and magnetic-flux calibration context
+    \item Kesden (2012) --- spin dependence of tidal disruption thresholds
+    \item Servin \& Kesden (2017) --- relativistic disruption/capture refinements
+    \item Rees (1988) and Phinney (1989) --- canonical TDE fallback-time scaling
 \end{itemize}
 
 \end{document}
