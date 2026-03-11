@@ -1,4 +1,3 @@
-````md
 # Using BHRuler (`bhruler.py`)
 
 A practical guide to running the Black Hole Ruler on your own source list—what to install, what columns to provide, what comes out, and how to interpret it.
