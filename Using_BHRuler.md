@@ -1,3 +1,4 @@
+````md
 # Using BHRuler (`bhruler.py`)
 
 A practical guide to running the Black Hole Ruler on your own source list—what to install, what columns to provide, what comes out, and how to interpret it.
@@ -38,27 +39,29 @@ This lets you use the same single-file tool for both standard BHRuler inputs and
 
 Install:
 
+```bash
 pip install pandas
+````
 
 ### Run with the built-in demo (no input file)
 
-
+```bash
 python bhruler.py --output trio_out.csv
-
+```
 
 This writes a 3-row CSV (`Cygnus X-1`, `Sgr A*`, `M87*`) using both accretion branches by default.
 
 ### Run on your own standard BHRuler CSV
 
-
+```bash
 python bhruler.py --input objects.csv --branch both --output derived.csv
-
+```
 
 ### Run directly on Survey V2
 
-
+```bash
 python bhruler.py --input 50_BH_Survey_V2_verified.csv --branch core --output survey_out.csv
-
+```
 
 ### Branch options
 
@@ -298,9 +301,9 @@ The code reports:
 
 Make capture easier and the transition sharper:
 
-
+```bash
 python bhruler.py --input my.csv --tde-mcrit 2.0e7 --tde-width 0.10 --output out.csv
-
+```
 
 ---
 
@@ -308,33 +311,33 @@ python bhruler.py --input my.csv --tde-mcrit 2.0e7 --tde-width 0.10 --output out
 
 ### A) Built-in demo
 
-
+```bash
 python bhruler.py --output trio_out.csv
-
+```
 
 ### B) Standard CSV with both accretion branches
 
-
+```bash
 python bhruler.py --input objects.csv --branch both --output derived.csv
-
+```
 
 ### C) Survey V2 direct ingestion
 
-
+```bash
 python bhruler.py --input 50_BH_Survey_V2_verified.csv --branch core --output survey_out.csv
-
+```
 
 ### D) Only ADAF branch
 
-
+```bash
 python bhruler.py --input objects.csv --branch adaf --output out_adaf.csv
-
+```
 
 ### E) Only efficiency bridge
 
-
+```bash
 python bhruler.py --input objects.csv --branch eta_bridge --output out_eta.csv
-
+```
 
 ### F) Per-row branch override
 
@@ -349,9 +352,9 @@ Target-3,4.3e6,0.3,0.0,,,core
 
 Then run:
 
-
+```bash
 python bhruler.py --input objects.csv --output out.csv
-
+```
 
 Each row uses its own branch value if present.
 
@@ -399,7 +402,7 @@ A heuristic disruption/capture flag. It is useful for quick classification sweep
 
 Although designed as a CLI, the file can also be imported as a Python module.
 
-
+```python
 import pandas as pd
 import bhruler as br
 
@@ -416,7 +419,7 @@ row = dict(
 
 out = br.compute_row(row, branch="both", tde_mcrit=3e7, tde_width=0.15)
 pd.DataFrame([out]).to_csv("one_row.csv", index=False)
-
+```
 
 Useful functions include:
 
@@ -436,9 +439,9 @@ Useful functions include:
 
 Use the survey-enabled script and run:
 
-
+```bash
 python bhruler.py --input 50_BH_Survey_V2_verified.csv --branch core --output survey_out.csv
-
+```
 
 The updated parser accepts Survey V2 field names such as:
 
@@ -455,9 +458,9 @@ Supply the required parameters:
 
 Or use:
 
-
+```bash
 python bhruler.py --input your.csv --branch core --output out.csv
-
+```
 
 if you only want the geometry/timing outputs.
 
@@ -481,9 +484,9 @@ Check that:
 
 Quote any path with spaces:
 
-
+```bash
 python bhruler.py --input "C:\path with spaces\in.csv" --output out.csv
-
+```
 
 ---
 
@@ -522,9 +525,9 @@ Adjust these only if you are intentionally testing alternative calibrations or p
 
 Yes:
 
-
+```bash
 python bhruler.py --input 50_BH_Survey_V2_verified.csv --branch core --output survey_out.csv
-
+```
 
 ### Do I need `sigma_kms` and `Re_kpc`?
 
@@ -564,4 +567,6 @@ Example code reference:
 
 ---
 
-That’s it! Drop in a CSV, choose a branch, and you’ll get a tidy table of derived scales, spin-aware frequencies, jet-power brackets, and simple environment/TDE diagnostics—consistent across XRBs, SMBHs, and survey-style catalogs.
+That’s it. Drop in a CSV, choose a branch, and you’ll get a tidy table of derived scales, spin-aware frequencies, jet-power brackets, and simple environment/TDE diagnostics—consistent across XRBs, SMBHs, and survey-style catalogs.
+
+```
