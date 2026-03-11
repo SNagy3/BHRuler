@@ -16,6 +16,9 @@ Input CSV columns (case-insensitive, extra columns ignored):
     name, M_Msun, a_star, lambda_Edd, eta_eff, kappa, sigma_kms, Re_kpc, branch
   Survey V2 aliases also supported:
     Name, Class, Mass_Msun, Spin_a, Spin_Known, Regime
+  Per-row branch override:
+    Include a 'branch' column in the input CSV to override --branch for individual rows.
+    Any row with a non-empty 'branch' value will use that branch instead of the CLI default.
 
 Branch options:
   - core       : computes mass/spin/timing/ISCO/TDE quantities only
@@ -327,7 +330,9 @@ def compute_row(obj: Dict[str, Any], branch: str,
         name / Name, M_Msun / Mass_Msun / M, a_star / Spin_a / spin,
         lambda_Edd / lambda, eta_eff, kappa, sigma_kms, Re_kpc.
     branch : str
-        'core', 'eta_bridge', 'adaf', or 'both'.
+        'core', 'eta_bridge', 'adaf', or 'both'.  When called from main(),
+        this is sourced from the row's own 'branch' column if present, falling
+        back to the CLI --branch flag.
     tde_mcrit : float
         Logistic capture midpoint [M_sun].
     tde_width : float
@@ -345,11 +350,13 @@ def compute_row(obj: Dict[str, Any], branch: str,
     spin_known = _get_flex(obj, "Spin_Known")
     regime     = _get_flex(obj, "Regime")
     survey_like = any(_get_flex(obj, k) is not None for k in (
-        "Mass_Msun", "Spin_a", "Invariant_fISCO_tg", "Orbital_Period_s"
+        "Mass_Msun", "Spin_a", "Class", "Spin_Known", "Regime"
     ))
 
     M     = _float_flex(obj, "M_Msun", "Mass_Msun", "M", "mass_Msun",
                         "Mass [M_sun]", "M [M_sun]", "M [Msun]")
+    if M <= 0:
+        raise ValueError(f"M_Msun must be > 0; got {M!r} for object {name!r}")
     a     = _float_flex(obj, "a_star", "Spin_a", "spin", "Spin a_* (prograde)",
                         "a_* (assumed/est.)", default=0.0)
     lam   = _float_flex(obj, "lambda_Edd", "lambda", "L/L_Edd", "L/L_Edd (assumed)",
